@@ -15,7 +15,7 @@ Memory B cells are key cellular components of the long-term humoral immunity tha
 **Keywords:**
 Memory B cells - Respiratory infection - Influenza virus - SARS-CoV-2 - Lung mucosa - Permissive selection
 
-DOI : 
+**DOI:**
 
 ---
 ---
@@ -75,6 +75,9 @@ For instance, if you have chosen to clone the Git repository in __"/home/spinell
     export WORKING_DIR=/home/spinellil/workspace/moFluMemB
 ```
 
+---
+---
+
 ### Download the data
 
 Each sample needs its own sub-folder containing the initial data used by the analysis. Those data can be downloaded from Zenodo and uncompressed. The Zenodo dataset DOI are **TODO: Add the 3 datasets DOI**. The initial data from the analysis are the pre-processed data :
@@ -118,50 +121,62 @@ Once done, you may obtain the following subfolder structure, each of them contai
 
 ```
 
+---
+---
+
+### Install Singularity and Docker
+
+You need to install Singularity v2.6 on your system to run the complete analysis. Follow the instructions here : https://sylabs.io/guides/2.6/admin-guide/
+
+Optionaly, you can install Docker on your system to take advantage of interactive analysis environment with Rstudio, follow the instructions here : https://docs.docker.com/get-docker/
+
+---
+---
+
+### Install Snakemake
+
+You need to install Snakemake to run the complete analysis workflow. Use your prefered solution : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html
+
+---
+---
+
 ### Download the Docker and Singularity images
 
 Docker image tar file and Singularity img files are stored on Zenodo  **TODO: Add the containers DOI**. Open a shell command and change dir to the root of the cloned Git repository (WORKING_DIR). Then execute the following commands to download the tarball file and untar  it:
 
 **On linux:**
 
+```
     cd $WORKING_DIR
-    wget **TODO: Add the container URL** -O **TODO: Add the container file name**
-    tar zxvf **TODO: Add the container file name**
+    wget **TODO: Add the container URL** -O moFluMemB_SingularityImages.tar.gz
+    tar zxvf moFluMemB_SingularityImages.tar.gz
+```
 
-These commands will create 3 sub-folders named 02_Container:
+These commands will create a sub-folder named **02_Container** in the first dataset folder:
 
+```
     moFluMemB
-    └── custom_201216_m_moFluMemB
+    └── 10x_190712_m_moFluMemB
         └── 02_Container
+```
 
-The first one contains a Docker image tar file used for the bulk RNA-seq analysis. The second one contains the Singularity images for the single-cell RNA-seq analysis. Since the singularity images are used for the 4 single-cell samples analysis, they must be present in all the sample folder in the same 02_Container subfolder. Instead of copying the image files, we will create symbolic links:
+This folder contains the Singularity images for the single-cell RNA-seq analysis. Since the Singularity images are used for the 3 single-cell samples analysis, they must be present in all the sample folder in the same **02_Container** subfolder. Instead of copying the image files, we will create symbolic links to spare disk space:
 
 **On linux:**
 
+```
     cd $WORKING_DIR
     ln -s 10x_190712_m_moFluMemB/02_Container 10x_191105_m_moFluMemB/02_Container
     ln -s 10x_190712_m_moFluMemB/02_Container custom_201216_m_moFluMemB/02_Container
+```
 
-### Install Docker and Singularity
-
-You need to install Docker and Singularity v2.6 on your system.
-
-- To install Docker, follow the instructions here : https://docs.docker.com/get-docker/
-
-- To install Singularity v2.6, follow the instructions here : https://sylabs.io/guides/2.6/admin-guide/
-
-### Install Snakemake
-
-If you want to take advantage of the workflow management we used for the single-cell RNA-seq analysis, you have to install Snakemake. See the official instruction and use your prefered solution:
-
-https://snakemake.readthedocs.io/en/stable/getting_started/installation.html
 
 ---
 ---
 
 ## Run the analysis
 
-The analysis uses the Singularity images and optionnaly Snakemake.
+The analysis uses the Singularity images and Snakemake.
 
 The study contains 3 samples of single-cell RNA-seq data. Each sample have several steps of analysis you will find the R script files in the subfolder **03_Script**.
 
@@ -171,18 +186,22 @@ The simpliest way to run the complete single-cell analysis of a sample is to use
 
 In order to use the snakemake workflow, please type first the following commands:
 
+```
      cd $WORKING_DIR
      ln -s Embryo_Stage13.5_FetalLiver/04_Workflow/snakefile.yml Embryo_Stage13.5_FetalLiver/snakefile.yml
      ln -s Embryo_Stage13.5_Periphery_CellRangerV3/04_Workflow/snakefile.yml Embryo_Stage13.5_Periphery_CellRangerV3/snakefile.yml
      ln -s Embryo_Stage14.5_FetalLiver/04_Workflow/snakefile.yml Embryo_Stage14.5_FetalLiver/snakefile.yml
      ln -s Embryo_Stage14.5_Periphery_CellRangerV3/04_Workflow/snakefile.yml Embryo_Stage14.5_Periphery_CellRangerV3/snakefile.yml
+```
 
 To run the analysis for the Embryo_Stage13.5_FetalLiver (for instance), then run the following commands:
 
 Note: you have to manually change the **$WORKING_DIR** string in the snakemake command below by the value of the environment variable (i.e the path where you clone the project) because snakemake may not interpret the variable name correctly:
 
+```
      cd $WORKING_DIR/Embryo_Stage13.5_FetalLiver
      snakemake -r --snakefile snakefile.yml --use-singularity --singularity-args "-B $WORKING_DIR:$WORKING_DIR"
+```
      
 To execute the analysis of the other sample, simply change folder to the target sample and run again the same snakemake command.
 
