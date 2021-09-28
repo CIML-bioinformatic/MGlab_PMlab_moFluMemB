@@ -33,11 +33,11 @@ To reproduce the analysis, you have to first, prepare the environments (see "Pre
 
 As described in the article, there is 3 datasets in this study. 
 
-* 10x_190712_m_moFluMemB : 10x 5’ scRNA-Seq on single-cell suspensions from spleen, lymph nodes and lungs with enzymatic digestion of lung tissue at 37°C with 10x 5’ scRNA-Seq library preparation.
-* 10x_191105_m_moFluMemB :  : 10x 5’ scRNA-Seq on single-cell suspensions from spleen, lymph nodes and lungs with mechanical dissociation of lung tissue at 4°C 10x 5’ scRNA-Seq library preparation.
+* 10x_190712_m_moFluMemB : 10x 5’ scRNA-Seq on single-cell suspensions from spleen, lymph nodes and lungs with enzymatic digestion of lung tissue at 37°C.
+* 10x_191105_m_moFluMemB :  : 10x 5’ scRNA-Seq on single-cell suspensions from spleen, lymph nodes and lungs with mechanical dissociation of lung tissue at 4°C.
 * custom_201216_m_moFluMemB : FB5P-seq protocol (Attaf et al., 2020) on single-cell suspensions from lungs with enzymatic digestion, and stained with a panel of antibodies for identifying subsets of 
 
-When downloading the code and data, you will obtains 3 sub-folders with names as below:
+When downloading the code and data (see below), you will obtains 3 sub-folders with names as below:
 
 ```
     moFluMemB
@@ -54,10 +54,10 @@ When downloading the code and data, you will obtains 3 sub-folders with names as
 In order to prepare the environment for analysis execution, it is required to:
 
 - Clone the github repository and set the WORKING_DIR environment variable
+- Download the pre-processed data
 - Download the docker image tar file and the singularity img files
 - Install Docker and Singularity
 - Load the docker image on your system
-- Download the pre-processed data (Count table for bulk RNA-seq and CellRanger results for single-cell RNA-seq)
 
 Below you will find detailed instruction for each of these steps.
 
@@ -67,63 +67,56 @@ Use you favorite method to clone this repository in a chosen folder. This will c
 
 Then, you must set an environment variable called **WORKING_DIR** with a value set to the path to this folder.
 
-For instance, if you have chosen to clone the Git repository in __"/home/spinellil/workspace"__, then the WORKING_DIR variable will be set to __"/home/spinellil/workspace/moFluMemB"__
+For instance, if you have chosen to clone the Git repository in __"/home/spinellil/workspace"__, then the **WORKING_DIR** variable will be set to __"/home/spinellil/workspace/moFluMemB"__
 
 **On linux:**
 
+```
     export WORKING_DIR=/home/spinellil/workspace/moFluMemB
+```
 
-### Download the raw data
+### Download the data
 
-Each sample needs its own **00_RawData** sub-folder containing the initial data used by the analysis. Those data can be downloaded from Zenodo and uncompressed. The Zenodo dataset DOI are **TODO: Add the 3 datasets DOI**.
+Each sample needs its own sub-folder containing the initial data used by the analysis. Those data can be downloaded from Zenodo and uncompressed. The Zenodo dataset DOI are **TODO: Add the 3 datasets DOI**. The initial data from the analysis are the pre-processed data :
+
+* CellRangerAnalysis (for the two first datasets) : contains the result of Cell Ranger count analysis from the mRNA fastq
+* CITESeqCountAnalysis (for the two first datasets) : contains the result of CITE-seq-Count analysis from the HTP fastq
+* BCRAnalysis (for all datasets): contains the BCR repertoire analysis and for the FB5P-seq dataset also the mRNA count tables and the Protein count tables.
+
+Scripts of the pre-processing steps is provided for Cell Ranger count analysis and CITE-seq-Count analysis and corresponding raw data (fastq files) can be downloaded from GEO (see article). For FB5P-seq pre-processing see pipeline description in (Attaf et al., 2020).
 
 To download and uncompress the data, use the following code:
 
 **On linux:**
 
+```
     cd $WORKING_DIR
-    wget **TODO: Add the dataset1 URL** -O **TODO: Add the dataset1 file name**
-    tar zxvf **TODO: Add the dataset1 file name**
+    wget **TODO: Add the dataset1 URL** -O 10x_190712_m_moFluMemB_processedData.tar.gz
+    tar zxvf 10x_190712_m_moFluMemB_processedData.tar.gz
     
-    wget **TODO: Add the dataset2 URL** -O **TODO: Add the dataset1 file name**
-    tar zxvf **TODO: Add the dataset2 file name**
+    wget **TODO: Add the dataset2 URL** -O 10x_191105_m_moFluMemB_processedData.tar.gz
+    tar zxvf 10x_191105_m_moFluMemB_processedData.tar.gz
 
-    wget **TODO: Add the dataset3 URL** -O **TODO: Add the dataset1 file name**
-    tar zxvf **TODO: Add the dataset3 file name**
-    
+    wget **TODO: Add the dataset3 URL** -O custom_201216_m_moFluMemB_processedData.tar.gz
+    tar zxvf custom_201216_m_moFluMemB_processedData.tar.gz
+```
+ 
 Once done, you may obtain the following subfolder structure, each of them containing several files.
 
+```
     moFluMemB
     ├── 10x_190712_m_moFluMemB
-    │   └── 00_RawData
+    │   ├── 05_Output/01_CellRangerAnalysis
+    │   ├── 05_Output/02_CITEseqCountAnalysis
+    │   └── 05_Output/03_BCRAnalysis
     ├── 10x_191105_m_moFluMemB
-    │   └── 00_RawData
+    │   ├── 05_Output/01_CellRangerAnalysis
+    │   ├── 05_Output/02_CITEseqCountAnalysis
+    │   └── 05_Output/03_BCRAnalysis
     └── custom_201216_m_moFluMemB
-        └── 00_RawData
+        └── 05_Output/03_BCRAnalysis
 
-### Download the reference files
-
-The study uses references (genome annotations) you have to download. The annotations used during the study are available on Zenodo **TODO: Add the reference DOI**. Use the following command to download the tarball file and uncompress it.
-
-Note: Since the reference files are used for the 3 single-cell samples analysis, they must be present in all the sample folder in the same **01_Reference** subfolder. Instead of copying the files, we will create symbolic links:
-
-**On linux:**
-
-    cd $WORKING_DIR
-    wget **TODO: Add the reference URL** -O **TODO: Add the reference file name**
-    tar zxvf **TODO: Add the reference file name**
-    ln -s 10x_190712_m_moFluMemB/01_Reference 10x_191105_m_moFluMemB/01_Reference
-    ln -s 10x_190712_m_moFluMemB/01_Reference custom_201216_m_moFluMemB/01_Reference
-
-These commands will create 4 sub-folders named 01_Reference:
-
-    moFluMemB
-    ├── 10x_190712_m_moFluMemB
-    │   └── 01_Reference
-    ├── 10x_191105_m_moFluMemB
-    │   └── 01_Reference
-    └── custom_201216_m_moFluMemB
-        └── 01_Reference
+```
 
 ### Download the Docker and Singularity images
 
