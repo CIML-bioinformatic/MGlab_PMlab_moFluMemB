@@ -31,12 +31,20 @@ To reproduce the analysis, you have to first, prepare the environments (see "Pre
 
 ## Description of the datasets
 
-As described in the article, there is 3 datasets in this study. **TODO:describe datasets** . When downloading the code and data, you will obtains 3 sub-folders with names as below:
+As described in the article, there is 3 datasets in this study. 
 
+* 10x_190712_m_moFluMemB : 10x 5’ scRNA-Seq on single-cell suspensions from spleen, lymph nodes and lungs with enzymatic digestion of lung tissue at 37°C with 10x 5’ scRNA-Seq library preparation.
+* 10x_191105_m_moFluMemB :  : 10x 5’ scRNA-Seq on single-cell suspensions from spleen, lymph nodes and lungs with mechanical dissociation of lung tissue at 4°C 10x 5’ scRNA-Seq library preparation.
+* custom_201216_m_moFluMemB : FB5P-seq protocol (Attaf et al., 2020) on single-cell suspensions from lungs with enzymatic digestion, and stained with a panel of antibodies for identifying subsets of 
+
+When downloading the code and data, you will obtains 3 sub-folders with names as below:
+
+```
     moFluMemB
-    ├── 10x_190712_m_moFluMemB : Single-cell RNA-seq of **TODO:describe datasets**
-    ├── 10x_191105_m_moFluMemB :  : Single-cell RNA-seq of **TODO:describe datasets**
-    └── custom_201216_m_moFluMemB : Single-cell RNA-seq of **TODO:describe datasets**
+    ├── 10x_190712_m_moFluMemB
+    ├── 10x_191105_m_moFluMemB
+    └── custom_201216_m_moFluMemB
+```
 
 ---
 ---
@@ -55,7 +63,7 @@ Below you will find detailed instruction for each of these steps.
 
 ### Clone the github repository
 
-Use you favorite method to clone this repository in a chosen folder. This will create a folder **"moFluMemB"** with all the source code. 
+Use you favorite method to clone this repository in a chosen folder. This will create a folder **moFluMemB** with all the source code. 
 
 Then, you must set an environment variable called **WORKING_DIR** with a value set to the path to this folder.
 
@@ -67,7 +75,7 @@ For instance, if you have chosen to clone the Git repository in __"/home/spinell
 
 ### Download the raw data
 
-Each sample needs its own **"00_RawData"** sub-folder containing the initial data used by the analysis. Those data can be downloaded from Zenodo and uncompressed. The Zenodo dataset DOI are **TODO: Add the 3 datasets DOI**.
+Each sample needs its own **00_RawData** sub-folder containing the initial data used by the analysis. Those data can be downloaded from Zenodo and uncompressed. The Zenodo dataset DOI are **TODO: Add the 3 datasets DOI**.
 
 To download and uncompress the data, use the following code:
 
@@ -97,7 +105,7 @@ Once done, you may obtain the following subfolder structure, each of them contai
 
 The study uses references (genome annotations) you have to download. The annotations used during the study are available on Zenodo **TODO: Add the reference DOI**. Use the following command to download the tarball file and uncompress it.
 
-Note: Since the reference files are used for the 3 single-cell samples analysis, they must be present in all the sample folder in the same **"01_Reference"** subfolder. Instead of copying the files, we will create symbolic links:
+Note: Since the reference files are used for the 3 single-cell samples analysis, they must be present in all the sample folder in the same **01_Reference** subfolder. Instead of copying the files, we will create symbolic links:
 
 **On linux:**
 
@@ -160,41 +168,13 @@ https://snakemake.readthedocs.io/en/stable/getting_started/installation.html
 
 ## Run the analysis
 
-There are two types of analysis in this study : bulk RNA-seq and single-cell RNA-seq. The bulk RNA-seq analysis uses the Docker image you loaded. The single-cell RNA-seq analysis uses the Singularity images and optionnaly Snakemake.
+The analysis uses the Singularity images and optionnaly Snakemake.
 
-### Run the bulk RNA-seq analysis
-
-The RNA-seq analysis are in two steps (step1 and step2). The first step make the QC, study the differentially expressed genes and their functionnal enrichment. The second step study the pattern of evolution of group of genes along the cell types (see article methods).
-
-To run the step1 analysis, use the following command:
-
-**On Linux:**
-
-    docker run -v $WORKING_DIR:$WORKING_DIR -e WORKING_DIR=$WORKING_DIR splab_ilcyou_deg_gsea 'cd $WORKING_DIR/Embryo_Bulk_Stage13.5_2tissues/03_Script/step1;Rscript launch_reports_compilation.R'
-
-To run the step2 analysis, use the following command:
-
-**On Linux:**
-
-     docker run -v $WORKING_DIR:$WORKING_DIR -e WORKING_DIR=$WORKING_DIR splab_ilcyou_deg_gsea 'cd $WORKING_DIR/Embryo_Bulk_Stage13.5_2tissues/03_Script/step2;Rscript launch_reports_compilation.R'
-
-Each analysis will generate a result in $WORKING_DIR/Embryo_Bulk_Stage13.5_2tissues/05_output/step1 or $WORKING_DIR/Embryo_Bulk_Stage13.5_2tissues/05_output/step2.
-In the output of the analysis, you will find a HTML file that contains the report of the analysis, with all figures. Some extra file are generated to export data in plain text.
-
-
-### Run the single-cell RNA-seq analysis
-
-The study contains 4 samples of single-cell RNA-seq data. Each sample have 5 step of analysis you will find the R script files in the subfolder 03_Script. The 5 steps are:
-
- * 01_QC : General quality control and bad cell removal
- * 02_GlobalHeterogeneity : First study of cell heterogeneity and sample contamination by undesired cell types
- * 03_GlobalHeterogeneity_NoContamination : Study of cell heterogeniety in absence of contamination
- * 04_Dynamics_Monocle : analysis of the cellular process dynamics using pseudotime analysis by Monocle
- * 05_Dynamics_RNAVelocity : analysis of the cellular process dynamics using RNA velocity (Velocyto)
+The study contains 3 samples of single-cell RNA-seq data. Each sample have several steps of analysis you will find the R script files in the subfolder **03_Script**.
 
 Each step of analysis generates its own HTML report file and several output files. Some output files of some steps are used by other steps, making a complete workflow of analysis.
 
-The simpliest way to run the complete single-cell analysis of a sample is to use the Snakemake workflow dedicated to each sample. The workflow is controled by a snakefile stored in the 04_Workflow subfolder of each sample folder. This workflow uses Singularity images (see above) to control the software environment for each analysis step. So you need both Snakemake and Singularity installed on your system to use this workflow.
+The simpliest way to run the complete single-cell analysis of a sample is to use the Snakemake workflow dedicated to each sample. The workflow is controled by a snakefile stored in the **04_Workflow** subfolder of each sample folder. This workflow uses Singularity images (see above) to control the software environment for each analysis step. So you need both Snakemake and Singularity installed on your system to use this workflow.
 
 In order to use the snakemake workflow, please type first the following commands:
 
@@ -206,7 +186,7 @@ In order to use the snakemake workflow, please type first the following commands
 
 To run the analysis for the Embryo_Stage13.5_FetalLiver (for instance), then run the following commands:
 
-Note: you have to manually change the "$WORKING_DIR" string in the snakemake command below by the value of the environment variable (i.e the path where you clone the project) because snakemake may not interpret the variable name correctly:
+Note: you have to manually change the **$WORKING_DIR** string in the snakemake command below by the value of the environment variable (i.e the path where you clone the project) because snakemake may not interpret the variable name correctly:
 
      cd $WORKING_DIR/Embryo_Stage13.5_FetalLiver
      snakemake -r --snakefile snakefile.yml --use-singularity --singularity-args "-B $WORKING_DIR:$WORKING_DIR"
