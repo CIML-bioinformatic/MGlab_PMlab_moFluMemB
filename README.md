@@ -218,11 +218,13 @@ Docker image tar files are stored on Zenodo  **TODO: Add the Docker containers D
 
 ## Run the analysis
 
-The analysis uses the Singularity images and Snakemake.
+### Run the analysis workflow using Snakemake
+
+The analysis workflow uses the Singularity images and Snakemake.
 
 The study contains 3 samples of single-cell RNA-seq data. Each sample have several steps of analysis you will find the R script files in the subfolder **03_Script**.
 
-Each step of analysis generates its own HTML report file and several output files. Some output files of some steps are used by other steps, making a complete workflow of analysis.
+Each step of analysis generates its own HTML report file and several output files. Some output files of some steps are used by other steps, making a complete workflow of analysis. The output files are stored in each datatset folder in a sub-folder named "05_Output".
 
 The simpliest way to run the complete single-cell analysis of a sample is to use the Snakemake workflow dedicated to each sample. The workflow is controled by a snakefile stored in the **04_Workflow** subfolder of each sample folder. This workflow uses Singularity images (see above) to control the software environment for each analysis step. So you need both Snakemake and Singularity installed on your system to use this workflow (see above).
 
@@ -239,15 +241,49 @@ In order to use the snakemake workflow, please type first the following commands
      ln -s 04_Workflow/snakefile_AllAnalysis.yml snakefile_AllAnalysis.yml
 ```
 
-To run the analysis for the 10x_190712_m_moFluMemB (for instance), then run the following commands:
+To run the analysis for the three datasets, run the following commands:
 
 
+* For dataset **10x_190712_m_moFluMemB**:
 ```
      cd $WORKING_DIR/10x_190712_m_moFluMemB
      snakemake -r --snakefile snakefile_AllAnalysis.yml --use-singularity
 ```
-     
-To execute the analysis of the other sample, simply change folder to the target sample and run again the same snakemake command.
+
+* For dataset **10x_191105_m_moFluMemB**:
+```
+     cd $WORKING_DIR/10x_191105_m_moFluMemB
+     snakemake -r --snakefile snakefile_AllAnalysis.yml --use-singularity
+```
+
+* For dataset **custom_201216_m_moFluMemB**:
+```
+     cd $WORKING_DIR/custom_201216_m_moFluMemB
+     snakemake -r --snakefile snakefile_AllAnalysis.yml --use-singularity
+```
+
+### (Optional) Run the analysis individually using Docker
+
+If you have loaded the docker images (see above), you can use Rstudio in Docker to run the analysis individually.
+
+To start a docker container, use the following command:
+
+```
+docker run -d -p 8787:8787 -v /$WORKING_DIR:/$WORKING_DIR -e PASSWORD=<PASSWORD> -e USER=$(whoami) -e USERID=$(id -u) -e GROUPID=$(id -g)  <IMAGE_NAME>
+```
+
+where:
+
+* <PASSWORD> is a simple string you will use as password to login into Rstudio
+* <IMAGE_NAME> is the Docker image name to run
+
+One started, you can open an internet browser and use the URL https://127.0.0.1:8787.
+
+At the login prompt, enter the name of the user session you are connected with and the password you type in place of <PASSWORD>. You are now in a Rstudio environment and the container is able to connect to the **WORKING_DIR**
+of your system. Inside you will find the project files. To tun the analysis, look at the scripts "launch_report_compilation.R" that will indicates you what to do.
+
+
+
 
 
 
