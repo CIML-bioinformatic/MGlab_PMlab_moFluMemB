@@ -26,9 +26,6 @@ Source code (scripts and dockerfiles) are available in the github repository. Re
 
 To reproduce the analysis, you have to first, prepare the environments (see "Prepare the Environments" section below), then execute the analysis step by step (see "Run the analysis" section below).
 
----
----
-
 ## Description of the datasets
 
 As described in the article, there is 3 datasets in this study. 
@@ -41,8 +38,11 @@ When downloading the code and data (see below), you will obtains 3 sub-folders w
 
 ```
     moFluMemB
+    │
     ├── 10x_190712_m_moFluMemB
+    │
     ├── 10x_191105_m_moFluMemB
+    │
     └── custom_201216_m_moFluMemB
 ```
 
@@ -55,15 +55,22 @@ In order to prepare the environment for analysis execution, it is required to:
 
 - Clone the github repository and set the WORKING_DIR environment variable
 - Download the pre-processed data
-- Download the docker image tar file and the singularity img files
-- Install Docker and Singularity
-- Load the docker image on your system
+- Install Singularity and Docker
+- Install Snakemake
+- Download the Singularity images
+- (Optional) Download the Docker images and load them on your system
 
 Below you will find detailed instruction for each of these steps.
+
+---
 
 ### Clone the github repository
 
 Use you favorite method to clone this repository in a chosen folder. This will create a folder **moFluMemB** with all the source code. 
+
+---
+
+### Set the WORKING_DIR variable
 
 Then, you must set an environment variable called **WORKING_DIR** with a value set to the path to this folder.
 
@@ -76,6 +83,34 @@ For instance, if you have chosen to clone the Git repository in __"/home/spinell
 ```
 
 ---
+
+### Add you working dir in the code
+
+The code uses variables that are stored in different "parameters" file. One important variable is the PATH_PROJECT which indicate to the code where your project is stored.
+You have to modify this variable in the code to reflect your project setup. Each dataset has a file called **globalParams.R** in the subfolder **O3_Script**
+
+```
+    moFluMemB
+    │
+    ├── 10x_190712_m_moFluMemB
+    │   │
+    │   └── 03_Script/globalParams.R
+    │
+    ├── 10x_191105_m_moFluMemB
+    │   │
+    │   └── 03_Script/globalParams.R
+    │
+    └── custom_201216_m_moFluMemB
+        │
+        └── 03_Script/globalParams.R
+```
+
+Edit those files and in each of them locate the line defining the **PATH_PROJECT** variable and change its value to the same value as the **WORKING_DIR** variable you defined before. Then save the files.
+
+```
+PATH_PROJECT = "/home/spinellil/workspace/moFluMemB"
+```
+
 ---
 
 ### Download the data
@@ -122,7 +157,6 @@ Once done, you may obtain the following subfolder structure, each of them contai
 ```
 
 ---
----
 
 ### Install Singularity and Docker
 
@@ -131,18 +165,16 @@ You need to install Singularity v2.6 on your system to run the complete analysis
 Optionaly, you can install Docker on your system to take advantage of interactive analysis environment with Rstudio, follow the instructions here : https://docs.docker.com/get-docker/
 
 ---
----
 
 ### Install Snakemake
 
 You need to install Snakemake to run the complete analysis workflow. Use your prefered solution : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html
 
 ---
----
 
-### Download the Docker and Singularity images
+### Download the Singularity images
 
-Docker image tar file and Singularity img files are stored on Zenodo  **TODO: Add the containers DOI**. Open a shell command and change dir to the root of the cloned Git repository (WORKING_DIR). Then execute the following commands to download the tarball file and untar  it:
+Singularity images files are stored on Zenodo  **TODO: Add the Singularity containers DOI**. Open a shell command and change dir to the root of the cloned Git repository (WORKING_DIR). Then execute the following commands to download the tarball file and untar  it:
 
 **On linux:**
 
@@ -166,10 +198,20 @@ This folder contains the Singularity images for the single-cell RNA-seq analysis
 
 ```
     cd $WORKING_DIR
-    ln -s 10x_190712_m_moFluMemB/02_Container 10x_191105_m_moFluMemB/02_Container
-    ln -s 10x_190712_m_moFluMemB/02_Container custom_201216_m_moFluMemB/02_Container
+    ln -s $WORKING_DIR/10x_190712_m_moFluMemB/02_Container/mglab_moflumemb_seuratrf.img $WORKING_DIR/10x_191105_m_moFluMemB/02_Container/mglab_moflumemb_seuratrf.img
+    ln -s $WORKING_DIR/10x_190712_m_moFluMemB/02_Container/mglab_moflumemb_seuratrf.img $WORKING_DIR/custom_201216_m_moFluMemB/02_Container/mglab_moflumemb_seuratrf.img
 ```
 
+### (Optional) Download the Docker images and load them on your system
+
+Docker image tar files are stored on Zenodo  **TODO: Add the Docker containers DOI**. Open a shell command and change dir to the root of the cloned Git repository (WORKING_DIR). Then execute the following commands to download the tarball file, untar it and load the docker images on your system: 
+
+```
+    cd $WORKING_DIR
+    wget **TODO: Add the container URL** -O moFluMemB_DockerImages.tar.gz
+    tar zxvf moFluMemB_DockerImages.tar.gz
+    docker load -i **TODO: Add the image name**
+```
 
 ---
 ---
@@ -182,25 +224,27 @@ The study contains 3 samples of single-cell RNA-seq data. Each sample have sever
 
 Each step of analysis generates its own HTML report file and several output files. Some output files of some steps are used by other steps, making a complete workflow of analysis.
 
-The simpliest way to run the complete single-cell analysis of a sample is to use the Snakemake workflow dedicated to each sample. The workflow is controled by a snakefile stored in the **04_Workflow** subfolder of each sample folder. This workflow uses Singularity images (see above) to control the software environment for each analysis step. So you need both Snakemake and Singularity installed on your system to use this workflow.
+The simpliest way to run the complete single-cell analysis of a sample is to use the Snakemake workflow dedicated to each sample. The workflow is controled by a snakefile stored in the **04_Workflow** subfolder of each sample folder. This workflow uses Singularity images (see above) to control the software environment for each analysis step. So you need both Snakemake and Singularity installed on your system to use this workflow (see above).
 
 In order to use the snakemake workflow, please type first the following commands:
 
 ```
-     cd $WORKING_DIR
-     ln -s Embryo_Stage13.5_FetalLiver/04_Workflow/snakefile.yml Embryo_Stage13.5_FetalLiver/snakefile.yml
-     ln -s Embryo_Stage13.5_Periphery_CellRangerV3/04_Workflow/snakefile.yml Embryo_Stage13.5_Periphery_CellRangerV3/snakefile.yml
-     ln -s Embryo_Stage14.5_FetalLiver/04_Workflow/snakefile.yml Embryo_Stage14.5_FetalLiver/snakefile.yml
-     ln -s Embryo_Stage14.5_Periphery_CellRangerV3/04_Workflow/snakefile.yml Embryo_Stage14.5_Periphery_CellRangerV3/snakefile.yml
+     cd $WORKING_DIR/10x_190712_m_moFluMemB
+     ln -s 04_Workflow/snakefile_AllAnalysis.yml snakefile_AllAnalysis.yml
+
+     cd $WORKING_DIR/10x_191105_m_moFluMemB
+     ln -s 04_Workflow/snakefile_AllAnalysis.yml snakefile_AllAnalysis.yml
+
+     cd $WORKING_DIR/custom_201216_m_moFluMemB
+     ln -s 04_Workflow/snakefile_AllAnalysis.yml snakefile_AllAnalysis.yml
 ```
 
-To run the analysis for the Embryo_Stage13.5_FetalLiver (for instance), then run the following commands:
+To run the analysis for the 10x_190712_m_moFluMemB (for instance), then run the following commands:
 
-Note: you have to manually change the **$WORKING_DIR** string in the snakemake command below by the value of the environment variable (i.e the path where you clone the project) because snakemake may not interpret the variable name correctly:
 
 ```
-     cd $WORKING_DIR/Embryo_Stage13.5_FetalLiver
-     snakemake -r --snakefile snakefile.yml --use-singularity --singularity-args "-B $WORKING_DIR:$WORKING_DIR"
+     cd $WORKING_DIR/10x_190712_m_moFluMemB
+     snakemake -r --snakefile snakefile_AllAnalysis.yml --use-singularity
 ```
      
 To execute the analysis of the other sample, simply change folder to the target sample and run again the same snakemake command.
