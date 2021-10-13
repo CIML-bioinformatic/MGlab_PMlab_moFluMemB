@@ -21,18 +21,18 @@ Memory B cells - Respiratory infection - Influenza virus - SARS-CoV-2 - Lung muc
 ---
 
 ## Goal of the github
-This github project contains the instructions and material to reproduce the analysis reported in the article (and more).
-Source code (scripts and dockerfiles) are available in the github repository. Required data and builded Docker/Singularity images are available on download. Instructions to reproduce the analysis are provided below.
+This github project contains the instructions and material to reproduce the analyses reported in the article (and more).
+Source code (scripts and dockerfiles) are available in the github repository. Required data and built Docker/Singularity images are available on download. Instructions to reproduce the analyses are provided below.
 
 To reproduce the analysis, you have to first, prepare the environments (see "Prepare the Environments" section below), then execute the analysis step by step (see "Run the analysis" section below).
 
 ## Description of the datasets
 
-As described in the article, there is 3 datasets in this study. 
+As described in the article, there are 3 datasets in this study. 
 
-* 10x_190712_m_moFluMemB : 10x 5’ scRNA-Seq on single-cell suspensions from spleen, lymph nodes and lungs with enzymatic digestion of lung tissue at 37°C.
-* 10x_191105_m_moFluMemB :  : 10x 5’ scRNA-Seq on single-cell suspensions from spleen, lymph nodes and lungs with mechanical dissociation of lung tissue at 4°C.
-* custom_201216_m_moFluMemB : FB5P-seq protocol (Attaf et al., 2020) on single-cell suspensions from lungs with enzymatic digestion, and stained with a panel of antibodies for identifying subsets of 
+* 10x_190712_m_moFluMemB : 10x 5’ scRNA-Seq on memory B cells sorted from single-cell suspensions of spleen, lymph nodes and lungs with enzymatic digestion of lung tissue at 37°C.
+* 10x_191105_m_moFluMemB :  : 10x 5’ scRNA-Seq on memory B cells sorted from single-cell suspensions of spleen, lymph nodes and lungs with mechanical dissociation of lung tissue at 4°C.
+* custom_201216_m_moFluMemB : FB5P-seq protocol (Attaf et al., 2020) on memory B cells sorted from single-cell suspensions of lungs with enzymatic digestion of lung tissue at 37°C, with index sorting information for a panel of antibodies identifying subsets of memory B cells.
 
 When downloading the code and data (see below), you will obtains 3 sub-folders with names as below:
 
@@ -87,7 +87,7 @@ For instance, if you have chosen to clone the Git repository in __"/home/spinell
 ### Add you working dir in the code
 
 The code uses variables that are stored in different "parameters" file. One important variable is the PATH_PROJECT which indicate to the code where your project is stored.
-You have to modify this variable in the code to reflect your project setup. Each dataset has a file called **globalParams.R** in the subfolder **O3_Script**
+You have to modify this variable in the code to reflect your project setup. Each dataset has a file called **globalParams.R** in the subfolder **03_Script**
 
 ```
     moFluMemB
@@ -118,10 +118,10 @@ PATH_PROJECT = "/home/spinellil/workspace/moFluMemB"
 Each sample needs its own sub-folder containing the initial data used by the analysis. Those data can be downloaded from Zenodo and uncompressed. The Zenodo dataset DOI are **TODO: Add the 3 datasets DOI**. The initial data from the analysis are the pre-processed data :
 
 * CellRangerAnalysis (for the two first datasets) : contains the result of Cell Ranger count analysis from the mRNA fastq
-* CITESeqCountAnalysis (for the two first datasets) : contains the result of CITE-seq-Count analysis from the HTP fastq
-* BCRAnalysis (for all datasets): contains the BCR repertoire analysis and for the FB5P-seq dataset also the mRNA count tables and the Protein count tables.
+* CITESeqCountAnalysis (for the two first datasets) : contains the result of CITE-seq-Count analysis from the HTO fastq
+* BCRAnalysis (for all datasets): contains the BCR repertoire analysis and for the FB5P-seq dataset also the mRNA count tables and the Protein count tables (index sorting).
 
-Scripts of the pre-processing steps is provided for Cell Ranger count analysis and CITE-seq-Count analysis and corresponding raw data (fastq files) can be downloaded from GEO (see article). For FB5P-seq pre-processing see pipeline description in (Attaf et al., 2020).
+Scripts of the pre-processing steps are provided for Cell Ranger count analysis and CITE-seq-Count analysis and corresponding raw data (fastq files) can be downloaded from GEO (see article). For FB5P-seq pre-processing see pipeline description in (Attaf et al., 2020).
 
 To download and uncompress the data, use the following code:
 
@@ -162,13 +162,13 @@ Once done, you may obtain the following subfolder structure, each of them contai
 
 You need to install Singularity v2.6 on your system to run the complete analysis. Follow the instructions here : https://sylabs.io/guides/2.6/admin-guide/
 
-Optionaly, you can install Docker on your system to take advantage of interactive analysis environment with Rstudio, follow the instructions here : https://docs.docker.com/get-docker/
+Optionally, you can install Docker on your system to take advantage of interactive analysis environment with Rstudio, follow the instructions here : https://docs.docker.com/get-docker/
 
 ---
 
 ### Install Snakemake
 
-You need to install Snakemake to run the complete analysis workflow. Use your prefered solution : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html
+You need to install Snakemake to run the complete analysis workflow. Use your preferred solution : https://snakemake.readthedocs.io/en/stable/getting_started/installation.html
 
 ---
 
@@ -192,7 +192,7 @@ These commands will create a sub-folder named **02_Container** in the first data
         └── 02_Container
 ```
 
-This folder contains the Singularity images for the single-cell RNA-seq analysis. Since the Singularity images are used for the 3 single-cell samples analysis, they must be present in all the sample folder in the same **02_Container** subfolder. Instead of copying the image files, we will create symbolic links to spare disk space:
+This folder contains the Singularity images for the single-cell RNA-seq analysis. Since the Singularity images are used for the 3 single-cell samples analyses, they must be present in all the sample folder in the same **02_Container** subfolder. Instead of copying the image files, we will create symbolic links to spare disk space:
 
 **On linux:**
 
@@ -222,11 +222,11 @@ Docker image tar files are stored on Zenodo  **TODO: Add the Docker containers D
 
 The analysis workflow uses the Singularity images and Snakemake.
 
-The study contains 3 samples of single-cell RNA-seq data. Each sample have several steps of analysis you will find the R script files in the subfolder **03_Script**.
+The study contains 3 samples of single-cell RNA-seq data. Each sample have several steps of analysis for which you will find the R script files in the subfolder **03_Script**.
 
 Each step of analysis generates its own HTML report file and several output files. Some output files of some steps are used by other steps, making a complete workflow of analysis. The output files are stored in each datatset folder in a sub-folder named "05_Output".
 
-The simpliest way to run the complete single-cell analysis of a sample is to use the Snakemake workflow dedicated to each sample. The workflow is controled by a snakefile stored in the **04_Workflow** subfolder of each sample folder. This workflow uses Singularity images (see above) to control the software environment for each analysis step. So you need both Snakemake and Singularity installed on your system to use this workflow (see above).
+The simpliest way to run the complete single-cell analysis of a sample is to use the Snakemake workflow dedicated to each sample. The workflow is controlled by a snakefile stored in the **04_Workflow** subfolder of each sample folder. This workflow uses Singularity images (see above) to control the software environment for each analysis step. So you need both Snakemake and Singularity installed on your system to use this workflow (see above).
 
 In order to use the snakemake workflow, please type first the following commands:
 
