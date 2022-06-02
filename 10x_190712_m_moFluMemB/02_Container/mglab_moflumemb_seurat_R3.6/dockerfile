@@ -1,0 +1,112 @@
+FROM rocker/tidyverse:3.6.3-ubuntu18.04
+
+MAINTAINER Lionel Spinelli (lionel.spinelli@univ-amu.fr)
+
+# ####################################
+# INSTALL JAVA
+# ####################################
+
+RUN apt-get update \
+&& apt-get -y install openjdk-8-jre \
+&& rm -rf /var/lib/apt/lists/*
+
+
+# ####################################
+# INSTALLING R PACKAGES FOR PROJECT
+# ####################################
+
+RUN apt-get update && apt-get install -y libxml2-dev \
+                                         libhdf5-serial-dev \
+                                         python3-pip \
+					 libglpk-dev
+
+# -- Install package managers
+RUN R -e 'install.packages( "devtools")'
+RUN R -e 'install.packages( "BiocManager")'
+
+# -- Install packages for knitr and markdown
+RUN R -e 'install.packages( "knitr")'
+RUN R -e 'install.packages( "formatR")'
+RUN R -e 'install.packages( "caTools")'
+RUN R -e 'install.packages( "rprojroot")'
+RUN R -e 'install.packages( "rmarkdown")'
+
+# -- Install data analysis tools
+RUN apt-get update && apt-get install -y libpng-dev
+RUN R -e 'install.packages( "ade4")'
+RUN R -e 'install.packages( "png")'
+RUN R -e 'install.packages( "data.table")'
+RUN R -e 'install.packages( "Rtsne")'
+RUN R -e 'install.packages( "Seurat")'
+RUN R -e 'install.packages( "umap")'
+RUN pip3 install --upgrade --user pip \
+    && python3 -m pip install umap-learn
+
+# -- Install Datatable package to have widget tables for reporting
+RUN R -e 'devtools::install_github( "ramnathv/htmlwidgets")'
+RUN R -e 'install.packages( "DT")'
+RUN R -e 'install.packages( "htmltools")'
+RUN R -e 'install.packages( "d3heatmap")'
+
+# -- Install plotting tools
+RUN R -e 'install.packages( "ggplot2")'
+RUN R -e 'install.packages( "ggpubr")'
+RUN R -e 'install.packages( "ggrepel")'
+RUN R -e 'install.packages( "gplots")'
+RUN R -e 'install.packages( "gridExtra")'
+RUN R -e 'install.packages( "heatmaply")'
+RUN R -e 'BiocManager::install("S4Vectors"); install.packages( "iheatmapr")'
+RUN R -e 'devtools::install_github( "thomasp85/patchwork")'
+RUN R -e 'install.packages( "pheatmap")'
+RUN R -e 'install.packages( "reshape")'
+RUN R -e 'install.packages( "VennDiagram")'
+
+# -- Install general prupose libraries
+RUN R -e 'install.packages( "funr")'
+RUN R -e 'install.packages( "pander")'
+RUN R -e 'install.packages( "rprojroot")'
+
+# -- Install packages for Clustal Omega
+RUN R -e 'install.packages("BiocManager")'
+RUN R -e 'BiocManager::install("msa")'
+RUN R -e 'install.packages("seqinr")'
+
+# ####################################
+# INSTALL CLUSTAL OMEGA
+# ####################################
+RUN apt-get update --fix-missing \
+    && apt-get install -y wget g++ make libargtable2-0 libargtable2-dev file libgomp1 \
+    && cd /usr/local/ \
+    && wget http://www.clustal.org/omega/clustal-omega-1.2.4.tar.gz \
+    && tar -xzvf clustal-omega-1.2.4.tar.gz \
+    && rm -f clustal-omega-1.2.4.tar.gz \
+    && cd clustal-omega-1.2.4 \
+    && ./configure && make && make install \
+    && cd .. \
+    && rm -rf /usr/local/clustal-omega-1.2.4 \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /pasteur
+
+
+RUN R -e 'install.packages("shazam")'
+
+RUN R -e 'install.packages( "https://cran.r-project.org/src/contrib/GlobalOptions_0.1.2.tar.gz", repos = NULL, type="source")'
+RUN R -e 'install.packages( "shape")'
+RUN R -e 'install.packages( "https://cran.r-project.org/src/contrib/circlize_0.4.12.tar.gz", repos = NULL, type="source")'
+RUN R -e 'install.packages( "svglite")'
+
+
+# ####################################
+# CLEAN INSTALL
+# ####################################
+  
+RUN apt-get clean\
+  && apt-get remove --yes --purge build-essential
+
+RUN mkdir -p /mnt
+
+
+
+CMD ["/init"]

@@ -1,0 +1,137 @@
+
+# ----------------------------------------------
+# Define some contants relative to project
+# ----------------------------------------------
+PROJECT_NAME="moFluMemB"
+EXPERIMENT_NAME="10x_191105_m_moFluMemB"
+
+TISSUE_LIST = [ "LG", "LN", "SP"]
+
+
+# ----------------------------------------------
+# The default target rule
+# ----------------------------------------------
+rule all:
+  input:
+    final_report_BCR = "05_Output/08_BCRRepertoire/moFluMemB_08_BCRRepertoire.html",
+    final_report_Tissues = "05_Output/09_CompareTissues/moFluMemB_09_CompareTissues.html"
+
+# ----------------------------------------------
+# Execute QC analysis
+# ----------------------------------------------
+rule QC_Demux:
+  input:
+    RNA_counts_barcodes = "05_Output/01_CellRangerAnalysis/10938436/outs/filtered_feature_bc_matrix/barcodes.tsv.gz",
+    RNA_counts_features = "05_Output/01_CellRangerAnalysis/10938436/outs/filtered_feature_bc_matrix/features.tsv.gz",
+    RNA_counts_matrix = "05_Output/01_CellRangerAnalysis/10938436/outs/filtered_feature_bc_matrix/matrix.mtx.gz",
+    UMI_counts_barcodes = "05_Output/02_CITEseqCountAnalysis/10938436/umi_count/barcodes.tsv.gz",
+    UMI_counts_features = "05_Output/02_CITEseqCountAnalysis/10938436/umi_count/features.tsv.gz",
+    UMI_counts_matrix = "05_Output/02_CITEseqCountAnalysis/10938436/umi_count/matrix.mtx.gz"
+
+  output:
+    html_report = "05_Output/04_QC_Demux/moFluMemB_04_QC_Demux.html",
+    seurat_robject_afterqc = "05_Output/04_QC_Demux/sc10x.rna.seurat.RDS"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/04_QC_Demux/launch_reports_compilation.R"
+
+# ----------------------------------------------
+# Analyse heterogeneity
+# ----------------------------------------------
+rule GlobalHeterogeneity:
+  input:
+    html_report = "05_Output/04_QC_Demux/moFluMemB_04_QC_Demux.html",
+    seurat_robject_afterqc = "05_Output/04_QC_Demux/sc10x.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/05_GlobalHeterogeneity/moFluMemB_05_GlobalHeterogeneity.html"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/05_GlobalHeterogeneity/launch_reports_compilation.R"
+
+
+# ----------------------------------------------
+# Analyse heterogeneity without BCR
+# ----------------------------------------------
+rule GlobalHeterogeneityNoBCR:
+  input:
+    html_report = "05_Output/05_GlobalHeterogeneity/moFluMemB_05_GlobalHeterogeneity.html",
+    seurat_robject_afterqc = "05_Output/04_QC_Demux/sc10x.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/06_GlobalHeterogeneityNoBCR/moFluMemB_06_GlobalHeterogeneityNoBCR.html",
+    seurat_robject_afterHeterogenity_noBCR = "05_Output/06_GlobalHeterogeneityNoBCR/sc10x.rna.seurat.RDS"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/06_GlobalHeterogeneityNoBCR/launch_reports_compilation.R"
+
+# ----------------------------------------------
+# Analyse heterogeneity without BCR by tissue
+# ----------------------------------------------
+rule GlobalHeterogeneityNoBCRByTissue:
+  input:
+    html_report = "05_Output/06_GlobalHeterogeneityNoBCR/moFluMemB_06_GlobalHeterogeneityNoBCR.html",
+    seurat_robject_afterqc = "05_Output/04_QC_Demux/sc10x.rna.seurat.RDS"
+
+  output:
+    html_report = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/moFluMemB_07_GlobalHeterogeneityNoBCRByTissue_{tissue}.html", tissue=TISSUE_LIST),
+    all_marker_genes = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/allMarkers_{tissue}.tab", tissue = TISSUE_LIST),
+    top_marker_genes = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/topMarkersDT_{tissue}.tab", tissue = TISSUE_LIST),
+    umap_embeddings = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/UMAP_Embedding_{tissue}.tab", tissue = TISSUE_LIST),
+    clustering = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/clusters_{tissue}.tab", tissue = TISSUE_LIST),
+    normalized_expressions =  expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/normalizedExpressions_{tissue}.tsv", tissue = TISSUE_LIST)
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/07_GlobalHeterogeneityNoBCRByTissue/launch_reports_compilation.R"
+
+# ----------------------------------------------
+# Analyse BCR repertoire
+# ----------------------------------------------
+rule BCRRepertoire:
+  input:
+    html_report = "05_Output/06_GlobalHeterogeneityNoBCR/moFluMemB_06_GlobalHeterogeneityNoBCR.html",
+    seurat_robject_afterHeterogenity_noBCR = "05_Output/06_GlobalHeterogeneityNoBCR/sc10x.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/08_BCRRepertoire/moFluMemB_08_BCRRepertoire.html"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/08_BCRRepertoire/launch_reports_compilation.R"
+
+# ----------------------------------------------
+# Analyse Compare tissues
+# ----------------------------------------------
+rule CompareTissues:
+  input:
+    html_report = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/moFluMemB_07_GlobalHeterogeneityNoBCRByTissue_{tissue}.html", tissue=TISSUE_LIST),
+    seurat_robject_afterqc = "05_Output/04_QC_Demux/sc10x.rna.seurat.RDS",
+    all_marker_genes = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/allMarkers_{tissue}.tab", tissue = TISSUE_LIST),
+    top_marker_genes = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/topMarkersDT_{tissue}.tab", tissue = TISSUE_LIST),
+    umap_embeddings = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/UMAP_Embedding_{tissue}.tab", tissue = TISSUE_LIST),
+    clustering = expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/clusters_{tissue}.tab", tissue = TISSUE_LIST),
+    normalized_expressions =  expand( "05_Output/07_GlobalHeterogeneityNoBCRByTissue/normalizedExpressions_{tissue}.tsv", tissue = TISSUE_LIST)
+
+  output:
+    html_report = "05_Output/09_CompareTissues/moFluMemB_09_CompareTissues.html"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/09_CompareTissues/launch_reports_compilation.R"
+

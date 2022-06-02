@@ -1,0 +1,169 @@
+---
+output:
+  html_document: 
+    theme: cerulean
+    toc: true
+    toc_float: true
+    toc_depth: 4
+---
+
+
+
+
+```{r setKnitrOptions, include=FALSE}
+knitr::opts_chunk$set(results='asis', echo = FALSE, error = TRUE, cache = FALSE, cache.comments = TRUE, fig.dim = c(7,7), autodep = TRUE)
+```
+
+
+
+
+```{r loadParamsAndDependencies, warning=FALSE, message=FALSE}
+
+### Load general Deps
+cat("<BR>WORKING_DIR=", WORKING_DIR)
+source( file.path( WORKING_DIR, "00_generalDeps.R"));
+
+# Import chunks from source files
+read_chunk( path=file.path( WORKING_DIR, "01_prepare_data.R"));
+read_chunk( path=file.path( WORKING_DIR, "02_compare_markers.R"));
+read_chunk( path=file.path( WORKING_DIR, "03_find_tissue_markers.R"));
+read_chunk( path=file.path( WORKING_DIR, "04_analysis_specific_clonotype.R"));
+read_chunk( path=file.path( WORKING_DIR, "05_prepare_paper_figures.R"));
+#read_chunk( path=file.path( WORKING_DIR, "90_finalize.R"));
+```
+
+---
+title: `r paste(SAMPLE_NAME, PROJECT_NAME, LITERAL_TITLE, sep ="<BR>")`
+---
+
+
+```{r initFunctions}
+
+### Create output directory
+dir.create( PATH_ANALYSIS_OUTPUT, showWarnings = FALSE);
+
+
+### Record starting time (for report and file names)
+startTime = Sys.time();
+startTimeReport   = format( startTime, "%Y %m %d %H:%M:%S")
+startTimeFileName = format( startTime, "%Y_%m_%d_%H_%M_%S")
+
+
+### Initialize utils
+
+# Create a hash for all parameters
+paramsHash = digest( paramsEnv, algo="murmur32");
+
+# Create a 'safe' unique prefix for output files
+outputFilesPrefix = path_sanitize( gsub("([[:punct:]])|\\s+", 
+                                        "_", 
+                                        paste0(PROJECT_NAME, "_",
+                                               SAMPLE_NAME, "_",
+                                               startTimeFileName, "_",
+                                               paramsHash, "_")),
+                                   replacement = "_");
+
+# Set seed for pseudo random number generator
+set.seed(42);
+
+# Create a hidden empty heatmap to prevent heatmapr interference with plotly functions (bug ?)
+cat('<div style="display: none">');
+main_heatmap(matrix(0));
+cat('</div>');
+```
+
+
+
+
+## Compare tissues
+
+
+### Run informations {.tabset .tabset-fade}
+
+#### Run
+<center>
+```{r runInfo_run}
+pander( c( 'Date'     = startTimeReport,
+           'Sample'   = SAMPLE_NAME,
+           'Hash'     = paramsHash));
+```
+</center>
+
+#### Parameters
+```{r runInfo_params}
+#showSimpleDT( paramsEnv); # Does not handle lists or nested lists easily
+listParams = as.list( paramsEnv);
+pander(listParams[order(names(listParams))]); # Show params in alphabetical order
+```
+
+#### System
+<center>
+```{r runInfo_sysInfo}
+showSimpleDT( Sys.info())
+```
+</center>
+
+#### R
+```{r runInfo_r}
+pander( sessionInfo());
+```
+
+<!-- Ending the tabset section -->
+### {.toc-ignore} 
+<br /><br />
+
+
+### Read data from Heterogenity by Tissue analysis
+```{r dataLoad, out.width='50%'}
+print( datatable( NULL))
+<<load_data>>
+```
+<br/><br />
+
+## Compare clusters between tissues
+
+In this section we look at the marker genes found between cluster of different tissues. For each pair of tissues we look at each pair of clusters (one
+per tissue). For each cluster pair, we compute the Jaccard Index :
+<br><br>
+Jaccard Index = #(intersection of marker genes of the two clusters) / #(union of the marker genes of the two clusters).
+<br><br>
+The result is presented as a heatmap. The color is relative to the Jaccard Index. The text represent (i) the number of marker genes in the intersection and (ii)
+the percentage of the intersection compare to the union (i.e. the Jaccard index multiplied by 100).<br>
+The next step search, for each cluster of one tissue, its best match (best Jaccard Index) through the clusters of the other tissue. The list of
+marker genes at the intersection of the list of marker genes of each cluster is then shown. Note that the list of gene is order by increasing adjusted p-value.
+
+```{r CompareClusters, out.width='50%', out.height='50%'}
+<<compare_markers_between_clusters>>
+```
+
+## Identify marker genes between tissues
+
+In this section, we consider each the tissue as a whole. We remove cells that were identified as affected by dissociation process and remove BCR genes. Then
+we look at markers genes for each tissue.
+
+```{r identifyTissueMarkerGenes, out.width='50%', out.height='50%'}
+<<identify_tissue_marker_genes>>
+```
+
+## Analysis specific clonotype
+
+```{r analysiSpecificClonotype}
+
+SELECTED_V.SEGMENT.EXACT.HEAVY = c( "IGHV9-3", "IGHV9-4" )
+SELECTED_V.SEGMENT.EXACT.LIGHT = c( "IGKV5-48")
+
+<<analysis_specific_clonotype>>
+
+SELECTED_V.SEGMENT.EXACT.HEAVY = c( "IGHV9-3", "IGHV9-4" )
+SELECTED_V.SEGMENT.EXACT.LIGHT = c( "IGKV5-48", "IGKV5-43", "IGKV5-37")
+
+<<analysis_specific_clonotype>>
+```
+
+## Prepare paper figures
+```{r preparePaperFigureHeatmap}
+<<prepare_paper_figure_heatmap>>
+```
+<br/><br />
+
+

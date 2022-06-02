@@ -1,0 +1,160 @@
+
+# ----------------------------------------------
+# Define some contants relative to project
+# ----------------------------------------------
+PROJECT_NAME="moFluMemB"
+EXPERIMENT_NAME="custom_201216_m_moFluMemB"
+#SAMPLE_ID="11230811"
+
+
+# ----------------------------------------------
+# The default target rule
+# ----------------------------------------------
+rule all:
+  input:
+    final_report = expand( "05_Output/08_BCRRepertoire/moFluMemB_08_BCRRepertoire.html", project = PROJECT_NAME),
+    final_report_stringentQC = expand( "05_Output/08_BCRRepertoire_StringentQC/moFluMemB_08_BCRRepertoire_StringentQC.html", project = PROJECT_NAME)
+
+# ----------------------------------------------
+# Execute QC analysis
+# ----------------------------------------------
+rule QC:
+  input:
+    UMI_counts = "05_Output/03_BCRAnalysis/A_Preprocessing/all_endogenes_UMI.csv",
+    meta_data = "05_Output/03_BCRAnalysis/D_MergingData/nofiltered_metadata_allFeatures.csv"
+
+  output:
+    html_report = "05_Output/04_QC/moFluMemB_04_QC.html",
+    seurat_robject = "05_Output/04_QC/custom.rna.seurat.RDS"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/04_QC/launch_reports_compilation.R"
+
+# ----------------------------------------------
+# Execute QC analysis - Stringent mode
+# ----------------------------------------------
+rule StringentQC:
+  input:
+    UMI_counts = "05_Output/03_BCRAnalysis/A_Preprocessing/all_endogenes_UMI.csv",
+    meta_data = "05_Output/03_BCRAnalysis/D_MergingData/nofiltered_metadata_allFeatures.csv"
+
+  output:
+    html_report = "05_Output/04_StringentQC/moFluMemB_04_StringentQC.html",
+    seurat_robject = "05_Output/04_StringentQC/custom.rna.seurat.RDS"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/04_StringentQC/launch_reports_compilation.R"
+# ----------------------------------------------
+# Analyse heterogeneity
+# ----------------------------------------------
+rule GlobalHeterogeneity:
+  input:
+    html_report = "05_Output/04_QC/moFluMemB_04_QC.html",
+    seurat_robject_afterqc = "05_Output/04_QC/custom.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/05_GlobalHeterogeneity/moFluMemB_05_GlobalHeterogeneity.html"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/05_GlobalHeterogeneity/launch_reports_compilation.R"
+
+
+# ---------------------------------------------------------------------
+# Analyse heterogeneity - Stringent QC mode
+# ---------------------------------------------------------------------
+rule GlobalHeterogeneity_StringentQC:
+  input:
+    html_report = "05_Output/04_StringentQC/moFluMemB_04_StringentQC.html",
+    seurat_robject_afterqc = "05_Output/04_StringentQC/custom.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/05_GlobalHeterogeneity_StringentQC/moFluMemB_05_GlobalHeterogeneity_StringentQC.html"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/05_GlobalHeterogeneity_StringentQC/launch_reports_compilation.R"
+
+
+# ----------------------------------------------
+# Analyse heterogeneity without BCR
+# ----------------------------------------------
+rule GlobalHeterogeneityNoBCR:
+  input:
+    html_report = "05_Output/05_GlobalHeterogeneity/moFluMemB_05_GlobalHeterogeneity.html",
+    seurat_robject_afterqc = "05_Output/04_QC/custom.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/06_GlobalHeterogeneityNoBCR/moFluMemB_06_GlobalHeterogeneityNoBCR.html",
+    seurat_robject = "05_Output/06_GlobalHeterogeneityNoBCR/custom.rna.seurat.RDS"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/06_GlobalHeterogeneityNoBCR/launch_reports_compilation.R"
+
+# --------------------------------------------------
+# Analyse heterogeneity without BCR - Stringent QC
+# --------------------------------------------------
+rule GlobalHeterogeneityNoBCR_StringentQC:
+  input:
+    html_report = "05_Output/05_GlobalHeterogeneity_StringentQC/moFluMemB_05_GlobalHeterogeneity_StringentQC.html",
+    seurat_robject_afterqc = "05_Output/04_StringentQC/custom.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/06_GlobalHeterogeneityNoBCR_StringentQC/moFluMemB_06_GlobalHeterogeneityNoBCR_StringentQC.html",
+    seurat_robject = "05_Output/06_GlobalHeterogeneityNoBCR_StringentQC/custom.rna.seurat.RDS"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/06_GlobalHeterogeneityNoBCR_StringentQC/launch_reports_compilation.R"
+
+
+# ----------------------------------------------
+# Analyse BCR repertoire
+# ----------------------------------------------
+rule BCRRepertoire:
+  input:
+    html_report = "05_Output/06_GlobalHeterogeneityNoBCR/moFluMemB_06_GlobalHeterogeneityNoBCR.html",
+    seurat_robject_afterHeterogenity_noBCR = "05_Output/06_GlobalHeterogeneityNoBCR/custom.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/08_BCRRepertoire/moFluMemB_08_BCRRepertoire.html"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/08_BCRRepertoire/launch_reports_compilation.R"
+
+# ----------------------------------------------
+# Analyse BCR repertoire - Stringent QC
+# ----------------------------------------------
+rule BCRRepertoire_StringentQC:
+  input:
+    html_report = "05_Output/06_GlobalHeterogeneityNoBCR_StringentQC/moFluMemB_06_GlobalHeterogeneityNoBCR_StringentQC.html",
+    seurat_robject_afterHeterogenity_noBCR = "05_Output/06_GlobalHeterogeneityNoBCR_StringentQC/custom.rna.seurat.RDS"
+
+  output:
+    html_report = "05_Output/08_BCRRepertoire_StringentQC/moFluMemB_08_BCRRepertoire_StringentQC.html"
+
+  singularity: 
+    "02_Container/mglab_moflumemb_seuratrf.img"
+
+  script:
+    "03_Script/08_BCRRepertoire_StringentQC/launch_reports_compilation.R"
+
+

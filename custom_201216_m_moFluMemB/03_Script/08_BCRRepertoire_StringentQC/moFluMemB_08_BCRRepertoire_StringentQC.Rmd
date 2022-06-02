@@ -1,0 +1,181 @@
+---
+output:
+  html_document: 
+    theme: cerulean
+    toc: true
+    toc_float: true
+    toc_depth: 4
+---
+
+
+
+
+```{r setKnitrOptions, include=FALSE}
+knitr::opts_chunk$set(results='asis', echo = FALSE, error = TRUE, cache = FALSE, cache.comments = TRUE, autodep = TRUE)
+```
+
+
+
+
+```{r loadParamsAndDependencies, warning=FALSE, message=FALSE}
+### Create output dir
+dir.create( PATH_ANALYSIS_OUTPUT, showWarnings = FALSE, recursive = TRUE)
+
+### Load general Deps
+cat("<BR>WORKING_DIR=", WORKING_DIR)
+source( file.path( WORKING_DIR, "00_generalDeps.R"));
+
+# Import chunks from source files
+read_chunk( path=file.path( WORKING_DIR, "01_prepareData.R"));
+read_chunk( path=file.path( WORKING_DIR, "02_mergeData.R"));
+read_chunk( path=file.path( WORKING_DIR, "03_analyzeClonotypes.R"));
+read_chunk( path=file.path( WORKING_DIR, "04_analyzePhenotypes.R"));
+read_chunk( path=file.path( WORKING_DIR, "05_analyzeAGspecificity.R"));
+read_chunk( path=file.path( WORKING_DIR, "06_analyzeExpression.R"));
+read_chunk( path=file.path( WORKING_DIR, "07_analyzeSpecificClonotypes.R"));
+#read_chunk( path=file.path( WORKING_DIR, "90_finalize.R"));
+```
+
+---
+title: `r paste(PROJECT_NAME, LITERAL_TITLE, sep ="<BR>")`
+---
+
+
+```{r initFunctions}
+
+### Create output directory
+dir.create( PATH_ANALYSIS_OUTPUT, showWarnings = FALSE);
+
+
+### Record starting time (for report and file names)
+startTime = Sys.time();
+startTimeReport   = format( startTime, "%Y %m %d %H:%M:%S")
+startTimeFileName = format( startTime, "%Y_%m_%d_%H_%M_%S")
+
+
+### Initialize utils
+
+# Create a hash for all parameters
+paramsHash = digest( paramsEnv, algo="murmur32");
+
+# Create a 'safe' unique prefix for output files
+outputFilesPrefix = path_sanitize( gsub("([[:punct:]])|\\s+", 
+                                        "_", 
+                                        paste0(PROJECT_NAME, "_",
+                                               startTimeFileName, "_",
+                                               paramsHash, "_")),
+                                   replacement = "_");
+
+# Set seed for pseudo random number generator
+set.seed(42);
+
+# Create a hidden empty heatmap to prevent heatmapr interference with plotly functions (bug ?)
+cat('<div style="display: none">');
+main_heatmap(matrix(0));
+cat('</div>');
+```
+
+
+
+
+## BCR Analysis
+
+
+### Run informations {.tabset .tabset-fade}
+
+#### Run
+<center>
+```{r runInfo_run}
+pander( c( 'Date'     = startTimeReport,
+           'Hash'     = paramsHash));
+```
+</center>
+
+#### Parameters
+```{r runInfo_params}
+#showSimpleDT( paramsEnv); # Does not handle lists or nested lists easily
+listParams = as.list( paramsEnv);
+pander(listParams[order(names(listParams))]); # Show params in alphabetical order
+```
+
+#### System
+<center>
+```{r runInfo_sysInfo}
+showSimpleDT( Sys.info())
+```
+</center>
+
+#### R
+```{r runInfo_r}
+pander( sessionInfo());
+```
+
+<!-- Ending the tabset section -->
+### {.toc-ignore} 
+<br /><br />
+
+
+### Load and filter data produced by BCR reconstruction and analysis
+```{r prepareData, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE, fig.dim = c(7,7)}
+<<prepare_bcr_data>>
+```
+<br /><br />
+
+
+### BCR repertoire dispersion analysis on all tissues
+
+Here we look at the distribution of clonotype groups on the complete data. Here are the displayed analysis:
+
+* the clusters on a UMAP embedding for reference
+* the dispersion of clonotypes across the samples : as a table and as a cumulative barplot of percentages
+* the dispersion of the samples across the 11 largest clonotypes: as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the 11 largest clonotypes: as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the isotype of heayvy-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the isotype of light-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the V-Segment sub-group of heayvy-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the V-Segment sub-group of light-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the CDR3 lengths of heayvy-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the CDR3 lengths of light-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the number of mutations of heayvy-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the number of mutations of light-chain (all cells): as a table and as a cumulative barplot of percentages
+
+<b>Important note : barplots of cumulative percentages have to be crossed with the corresponding tables to consider the percentages with the numbers they are based on.</b>
+
+```{r analyzeClonotypesAllTissues, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE, fig.dim = c(7,7)}
+custom.rna.seurat = readRDS( file.path( PATH_SEURAT_FILTERED_OBJECT, paste0( PROJECT_SHORT_NAME, "_custom.rna.seurat.RDS")))
+<<merge_data>>
+<<analyze_clonotypes>>
+```
+
+### Analysis of the relation between BCR repertoire and Index sort phenotypes in two dimensions
+
+```{r analyzeBCRRepertoireToPhenotype, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE}
+<<analyze_bcrrepertoire_to_phenotype>>
+```
+
+
+### Analysis of the antigen specificity
+
+```{r analyzeAGspecificity, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE}
+<<analyze_AGspecificity>>
+```
+
+### Analysis of the expression of pehnotype groups
+
+```{r analyzePhenotypeToExpression, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE}
+<<analyze_phenotype_to_expression>>
+```
+
+### Analysis of antigen specificy of the cells using the top N used V-genes
+
+In this section, we select the top N used heavy-chain V-genes and the top N used ligh-chain V-genes and look at the Ag Specificity, the mouse of origin, the clonotype size and the cluster of the cells using those gene.
+
+For each indicator, the following tables show the number of cells per AG affinity group in function of the number N of top v-genes. The first table is the raw counts, the second the percentage per line and the third the percentage in the Ag-specificity groups.
+
+Each table is shown in a heatmap. The last heatmap showw the Pearson residual of the chi2 test on the first table.
+
+
+```{r analyzeSpecificClonotypes, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE}
+<<analyze_specific_clonotypes>>
+```
+

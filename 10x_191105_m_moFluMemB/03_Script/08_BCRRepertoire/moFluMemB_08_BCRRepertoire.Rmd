@@ -1,0 +1,158 @@
+---
+output:
+  html_document: 
+    theme: cerulean
+    toc: true
+    toc_float: true
+    toc_depth: 4
+---
+
+
+
+
+```{r setKnitrOptions, include=FALSE}
+knitr::opts_chunk$set(results='asis', echo = FALSE, error = TRUE, cache = FALSE, cache.comments = TRUE, fig.dim = c(7,7), autodep = TRUE)
+```
+
+
+
+
+```{r loadParamsAndDependencies, warning=FALSE, message=FALSE}
+### Load general Deps
+cat("<BR>WORKING_DIR=", WORKING_DIR)
+source( file.path( WORKING_DIR, "00_generalDeps.R"));
+
+# Import chunks from source files
+read_chunk( path=file.path( WORKING_DIR, "01_prepareData.R"));
+read_chunk( path=file.path( WORKING_DIR, "02_mergeData.R"));
+read_chunk( path=file.path( WORKING_DIR, "03_analyzeClonotypes.R"));
+#read_chunk( path=file.path( WORKING_DIR, "90_finalize.R"));
+```
+
+---
+title: `r paste(SAMPLE_NAME, PROJECT_NAME, LITERAL_TITLE, sep ="<BR>")`
+---
+
+
+```{r initFunctions}
+
+### Create output directory
+dir.create( PATH_ANALYSIS_OUTPUT, showWarnings = FALSE);
+
+
+### Record starting time (for report and file names)
+startTime = Sys.time();
+startTimeReport   = format( startTime, "%Y %m %d %H:%M:%S")
+startTimeFileName = format( startTime, "%Y_%m_%d_%H_%M_%S")
+
+
+### Initialize utils
+
+# Create a hash for all parameters
+paramsHash = digest( paramsEnv, algo="murmur32");
+
+# Create a 'safe' unique prefix for output files
+outputFilesPrefix = path_sanitize( gsub("([[:punct:]])|\\s+", 
+                                        "_", 
+                                        paste0(PROJECT_NAME, "_",
+                                               SAMPLE_NAME, "_",
+                                               startTimeFileName, "_",
+                                               paramsHash, "_")),
+                                   replacement = "_");
+
+# Set seed for pseudo random number generator
+set.seed(42);
+
+# Create a hidden empty heatmap to prevent heatmapr interference with plotly functions (bug ?)
+cat('<div style="display: none">');
+main_heatmap(matrix(0));
+cat('</div>');
+```
+
+
+
+
+## BCR Analysis
+
+
+### Run informations {.tabset .tabset-fade}
+
+#### Run
+<center>
+```{r runInfo_run}
+pander( c( 'Date'     = startTimeReport,
+           'Sample'   = SAMPLE_NAME,
+           'Hash'     = paramsHash));
+```
+</center>
+
+#### Parameters
+```{r runInfo_params}
+#showSimpleDT( paramsEnv); # Does not handle lists or nested lists easily
+listParams = as.list( paramsEnv);
+pander(listParams[order(names(listParams))]); # Show params in alphabetical order
+```
+
+#### System
+<center>
+```{r runInfo_sysInfo}
+showSimpleDT( Sys.info())
+```
+</center>
+
+#### R
+```{r runInfo_r}
+pander( sessionInfo());
+```
+
+<!-- Ending the tabset section -->
+### {.toc-ignore} 
+<br /><br />
+
+
+### Load and filter data produced by BCR reconstruction and analysis
+```{r prepareData, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE}
+<<prepare_data>>
+```
+<br /><br />
+
+
+### BCR repertoire dispersion analysis on all tissues
+
+Here we look at the distribution of clonotype groups on the complete data. Here are the displayed analysis:
+
+* the clusters on a UMAP embedding for reference
+* the dispersion of clonotypes across the samples : as a table and as a cumulative barplot of percentages
+* the dispersion of the samples across the 11 largest clonotypes: as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the 11 largest clonotypes: as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the isotype of heayvy-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the isotype of light-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the V-Segment sub-group of heayvy-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the V-Segment sub-group of light-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the CDR3 lengths of heayvy-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the CDR3 lengths of light-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the number of mutations of heayvy-chain (all cells): as a table and as a cumulative barplot of percentages
+* the dispersion of the clusters across the number of mutations of light-chain (all cells): as a table and as a cumulative barplot of percentages
+
+<b>Important note : barplots of cumulative percentages have to be crossed with the corresponding tables to consider the percentages with the numbers they are based on.</b>
+
+```{r analyzeClonotypesAllTissues, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE}
+sc10x.rna.seurat = readRDS( file.path( PATH_SEURAT_FILTERED_OBJECT, "sc10x.rna.seurat.RDS"))
+<<merge_data>>
+<<analyze_clonotypes>>
+#<<hierarchy_analysis>>
+```
+
+### BCR repertoire dispersion analysis on each tissue
+
+We do the same analysis as in the previous section but for each tissue separately
+
+```{r analyzeClonotypesEachTissues, results="asis", fig.keep="all", echo=FALSE, message=FALSE, warning=TRUE}
+for( current_tissue in names( PATH_SEURAT_FILTERED_OBJECT_BY_TISSUE)){
+
+  cat("<HR><HR><H4>Analysis for tissue", current_tissue, "</H4>")
+  sc10x.rna.seurat = readRDS( PATH_SEURAT_FILTERED_OBJECT_BY_TISSUE[[ current_tissue]])
+  <<merge_data>>
+  <<analyze_clonotypes>>
+}
+```
