@@ -115,7 +115,7 @@ PATH_PROJECT = "/home/spinellil/workspace/moFluMemB"
 
 ### Download the data
 
-Each sample needs its own sub-folder containing the initial data used by the analysis. Those data can be downloaded from Zenodo and uncompressed. The Zenodo dataset DOI are **TODO: Add the 3 datasets DOI**. The initial data from the analysis are the pre-processed data :
+Each sample needs its own sub-folder containing the initial data used by the analysis. Those data can be downloaded from Zenodo and uncompressed. The Zenodo dataset DOI are [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5564625.svg)](https://doi.org/10.5281/zenodo.5564625), [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5565864.svg)](https://doi.org/10.5281/zenodo.5565864) and [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5566675.svg)](https://doi.org/10.5281/zenodo.5566675). The initial data from the analysis are the pre-processed data :
 
 * CellRangerAnalysis (for the two first datasets) : contains the result of Cell Ranger count analysis from the mRNA fastq
 * CITESeqCountAnalysis (for the two first datasets) : contains the result of CITE-seq-Count analysis from the HTO fastq
@@ -129,13 +129,13 @@ To download and uncompress the data, use the following code:
 
 ```
     cd $WORKING_DIR
-    wget **TODO: Add the dataset1 URL** -O 10x_190712_m_moFluMemB_processedData.tar.gz
+    wget https://zenodo.org/record/5564625/files/10x_190712_m_moFluMemB_processedData.tar.gz -O 10x_190712_m_moFluMemB_processedData.tar.gz
     tar zxvf 10x_190712_m_moFluMemB_processedData.tar.gz
     
-    wget **TODO: Add the dataset2 URL** -O 10x_191105_m_moFluMemB_processedData.tar.gz
+    wget https://zenodo.org/record/5565864/files/10x_191105_m_moFluMemB_processedData.tar.gz -O 10x_191105_m_moFluMemB_processedData.tar.gz
     tar zxvf 10x_191105_m_moFluMemB_processedData.tar.gz
 
-    wget **TODO: Add the dataset3 URL** -O custom_201216_m_moFluMemB_processedData.tar.gz
+    wget https://zenodo.org/record/5566675/files/custom_201216_m_moFluMemB_processedData.tar.gz -O custom_201216_m_moFluMemB_processedData.tar.gz
     tar zxvf custom_201216_m_moFluMemB_processedData.tar.gz
 ```
  
@@ -174,13 +174,13 @@ You need to install Snakemake to run the complete analysis workflow. Use your pr
 
 ### Download the Singularity images
 
-Singularity images files are stored on Zenodo  **TODO: Add the Singularity containers DOI**. Open a shell command and change dir to the root of the cloned Git repository (WORKING_DIR). Then execute the following commands to download the tarball file and untar  it:
+Singularity images files are stored on Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5566675.svg)](https://doi.org/10.5281/zenodo.5566675). Open a shell command and change dir to the root of the cloned Git repository (WORKING_DIR). Then execute the following commands to download the tarball file and untar  it:
 
 **On linux:**
 
 ```
     cd $WORKING_DIR
-    wget **TODO: Add the container URL** -O moFluMemB_SingularityImages.tar.gz
+    wget https://zenodo.org/record/5566675/files/moFluMemB_SingularityImages.tar.gz -O moFluMemB_SingularityImages.tar.gz
     tar zxvf moFluMemB_SingularityImages.tar.gz
 ```
 
@@ -204,13 +204,13 @@ This folder contains the Singularity images for the single-cell RNA-seq analysis
 
 ### (Optional) Download the Docker images and load them on your system
 
-Docker image tar files are stored on Zenodo  **TODO: Add the Docker containers DOI**. Open a shell command and change dir to the root of the cloned Git repository (WORKING_DIR). Then execute the following commands to download the tarball file, untar it and load the docker images on your system: 
+Docker image tar files are stored on Zenodo [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5566675.svg)](https://doi.org/10.5281/zenodo.5566675). Open a shell command and change dir to the root of the cloned Git repository (WORKING_DIR). Then execute the following commands to download the tarball file, untar it and load the docker images on your system: 
 
 ```
     cd $WORKING_DIR
-    wget **TODO: Add the container URL** -O moFluMemB_DockerImages.tar.gz
+    wget https://zenodo.org/record/5566675/files/moFluMemB_DockerImages.tar.gz -O moFluMemB_DockerImages.tar.gz
     tar zxvf moFluMemB_DockerImages.tar.gz
-    docker load -i **TODO: Add the image name**
+    docker load -i mglab_moflumemb_seurat_r3_6.tar
 ```
 
 ---
