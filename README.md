@@ -1,21 +1,28 @@
-# Permissive clonal selection engenders discrete subsets of memory B cells with divergent transcriptional programs and specificities to viral antigens
+# Viral infection engenders bona fide and bystander subsets of lung-resident memory B cells through a permissive mechanism
 
 ## Article information
 
-**Title:** Permissive clonal selection engenders discrete subsets of memory B cells with divergent transcriptional programs and specificities to viral antigens.
+**Title:** Viral infection engenders bona fide and bystander subsets of lung-resident memory B cells through a permissive mechanism
 
 **Authors:** 
-1 Aix-Marseille Univ, Centre National de la Recherche Scientifique (CNRS), Institut National de la Santé et de la Recherche Médicale (INSERM), Centre d'Immunologie de Marseille-Luminy (CIML), Marseille, France.
+Claude Gregoire,1 Lionel Spinelli,1 Sergio Villazala-Merino,1 Laurine Gil,1 María Pía Holgado,1 Myriam Moussa,1 Chuang Dong,1 Ana Zarubica,2 Mathieu Fallet,1 Jean-Marc Navarro,1 Bernard Malissen,1,2 Pierre Milpied,1,∗ and Mauro Gaya1,3,∗∗
 
-% Corresponding author: E-mail: 
+1 Aix-Marseille Univ, Centre National de la Recherche Scientifique (CNRS), Institut National de la Santé et de la Recherche Médicale (INSERM), Centre d'Immunologie de Marseille-Luminy (CIML), Marseille, France.
+2 Centre d'Immunophénomique (CIPHE), Aix Marseille Université, INSERM, CNRS, Marseille, France
+∗Corresponding author
+∗∗Corresponding author
+3 Lead contact
+
+% Corresponding author: E-mail: gaya@ciml.univ-mrs.fr
 
 **Summary:**
-Memory B cells are key cellular components of the long-term humoral immunity that dominate recall responses by rapidly differentiating into effector cells. As the biology of memory B cells has been mainly studied in the context of synthetic antigen immunizations, the dynamics of these cells during infection remains largely unexplored. Here, we used respiratory infection models with influenza and SARS-CoV-2, and fluorescent-reporter mice to identify memory B cells regardless of antigen-specificity. Confocal imaging and scRNA-seq data revealed that three transcriptionally distinct subsets of memory B cells with divergent origin and tissue localization coexist in the lung mucosa upon resolution of infection. This comprises a minor subset of “innate-like” IgM+ cells and two large subsets of class-switched somatically mutated memory B cells that preferentially differentiate into plasma rather than germinal center cells upon activation. Concomitant analysis of antigen-specificity and B cell receptor repertoire revealed that these two larger subsets segregate “bonafide” virus-specific cells from “bystander” memory B cells with no apparent specificity for viral antigens, originated as product of permissive clonal selection. Thus, diverse transcriptional programs in memory B cells are not associated with specific effector fates but rather with divergent strategies of the immune system to simultaneously provide rapid protection from re-infection while diversifying the initial B cell repertoire.
+Lung-resident memory B cells (MBCs) provide localized protection against reinfection in respiratory airways. Currently, the biology of these cells remains largely unexplored. Here, we combined influenza and SARS-CoV-2 infection with fluorescent-reporter mice to identify MBCs regardless of antigen specificity. We found that two main transcriptionally distinct subsets of MBCs colonized the lung peribronchial niche after infection. These subsets arose from different progenitors and were both class switched, somatically mutated, and intrinsically biased in their differentiation fate toward plasma cells. Combined analysis of antigen specificity and B cell receptor repertoire segregated these subsets into “bona fide” virus-specific MBCs and “bystander” MBCs with no apparent specificity for eliciting viruses generated through an alternative permissive process. Thus, diverse transcriptional programs in MBCs are not linked to specific effector fates but rather to divergent strategies of the immune system to simultaneously provide rapid protection from reinfection while diversifying the initial B cell repertoire.
 
 **Keywords:**
 Memory B cells - Respiratory infection - Influenza virus - SARS-CoV-2 - Lung mucosa - Permissive selection
 
 **DOI:**
+10.1016/j.immuni.2022.06.002
 
 ---
 ---
